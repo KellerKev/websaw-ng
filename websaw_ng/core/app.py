@@ -111,8 +111,6 @@ class RouteMeta(SimpleNamespace):
 class BaseApp:
 
     static_registry = StaticRegistry
-    add_route = staticmethod(globs.app.add_route)
-    remove_route = staticmethod(globs.app.router.remove)
     reloader = Reloader
     SPAResponse = SPAResponse
     app_data: AppData
@@ -121,12 +119,39 @@ class BaseApp:
             self,
             default_config: dict,
             context: BaseContext,
+            router=None,
     ):
         self.default_config = default_config
         self.context = context
+        # Per-app router. Routing is instance-scoped: by default apps share the
+        # single ``globs.app`` ombott instance (one server serves every mounted
+        # app, dispatched by base_url). Pass your own ``ombott_ng.Ombott()`` (or
+        # ``DefaultApp(..., isolated=True)``) to give an app its OWN router —
+        # fully isolated in-process, so two apps can coexist / be reloaded in one
+        # Python process (e.g. side-by-side in a test), and each can be served on
+        # its own with ``ombott_ng.run(app.ombott, ...)`` / ``app.asgi``.
+        self._router = router if router is not None else globs.app
         self._registered: Dict[Callable, RouteMeta] = {}
         self._mixins: List['BaseApp'] = []
         self.app_data = None
+
+    def add_route(self, *args, **kw):
+        return self._router.add_route(*args, **kw)
+
+    def remove_route(self, route):
+        return self._router.router.remove(route)
+
+    @property
+    def ombott(self):
+        """This app's ombott instance (its own router when isolated, else the
+        shared ``globs.app``)."""
+        return self._router
+
+    @property
+    def asgi(self):
+        """ASGI entry point for this app's router — e.g. ``uvicorn svc:app.asgi``
+        (a single app per process, the production norm)."""
+        return self._router.asgi
 
     def spa(self, name='main'):
         return SPA(self, name)

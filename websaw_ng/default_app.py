@@ -18,7 +18,8 @@ from .fixtures.templates import SPAComponent
 
 
 class DefaultApp(BaseApp):
-    def __init__(self, ctx: BaseContext, *, config=None, name: str = None):
+    def __init__(self, ctx: BaseContext, *, config=None, name: str = None,
+                 router=None, isolated=False):
         if name is None:
             if self.__class__ is DefaultApp:
                 raise ValueError(
@@ -49,7 +50,9 @@ class DefaultApp(BaseApp):
         if config:
             cfg.update(config)
 
-        super().__init__(cfg, ctx)
+        if isolated and router is None:
+            router = ombott_ng.Ombott()
+        super().__init__(cfg, ctx, router=router)
 
     def use(self, *fixt):
         app_name = self.default_config['app_name']
