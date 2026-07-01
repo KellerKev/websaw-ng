@@ -1,0 +1,63 @@
+[project]
+name = "websaw-ng"
+description = "websaw-ng - an async, batteries-included Python web framework (the next-generation successor of websaw / py4web)"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+keywords = ["python", "webapplication", "vue", "javascript", "js"]
+authors = [
+  { name="Valery Kucherov", email="valq7711@gmail.com" },
+]
+maintainers = [
+  { name="KellerKev", email="kellerkev@gmail.com" },
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "ombott-ng>=1.0.0",
+    "click",
+    "threadsafevariable",
+    "pydal",
+    "pyjwt",
+    "voodoodal>=1.1.0",
+    "upytl>=0.0.7",
+    "pyjsaw>=1.1.0"
+]
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+full = [
+    "watchgod",
+    "upytl-standard>=0.0.3",
+]
+
+[project.urls]
+homepage = "https://github.com/KellerKev/websaw-ng"
+repository = "https://github.com/KellerKev/websaw-ng"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+include = ['websaw_ng*']
+namespaces = false
+
+
+[tool.setuptools.dynamic]
+version = {attr = "websaw_ng.__version__"}

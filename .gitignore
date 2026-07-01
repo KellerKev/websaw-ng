@@ -1,0 +1,66 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+*.zip
+MANIFEST
+
+# Unit test / coverage reports
+.tox/
+.cache
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mkdocs documentation
+/site
+
+##############################################
+.vscode/
+*.code-workspace
+tox.ini
+
+password.txt
+websaw/utils/
+
+__*
+!__init__.py
+!__pyjsaw__.py
+!__main__.py
+
+apps/*-dev
+apps/*-test
+apps/*_dev
+apps/*_test
+apps/*/databases/*
+!apps/*/databases/x
+!apps/*/databases/README
+apps/mixins/*/databases/*
+!apps/mixins/*/databases/x
+!apps/mixins/*/databases/README
+apps/*/static/images/*
+!apps/*/static/images/default.jpg
+apps/.*
+*.pyc
+.pixi/
+*.db
+*.db-journal
+*.duckdb
+.DS_Store
+.service/
+session.secret
+websaw.log
+node_modules/
