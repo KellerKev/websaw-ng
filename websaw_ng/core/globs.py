@@ -9,8 +9,11 @@ ombott_ng.DefaultConfig.max_memfile_size = 16 * 1024 * 1024
 app = ombott_ng.default_app()
 app.setup()
 
-request = app.request
-response = app.response
+# Context-local proxies (not app.request/app.response): they resolve to whichever
+# ombott app is serving the current request, so redirect()/ctx.response/Set-Cookie
+# always target the right response -- even with several apps in one process.
+request = ombott_ng.request
+response = ombott_ng.response
 static_file = ombott_ng.static_file
 
 request_hooks = SimpleNamespace(before=set())

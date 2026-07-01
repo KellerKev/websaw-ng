@@ -51,7 +51,13 @@ class DefaultApp(BaseApp):
             cfg.update(config)
 
         if isolated and router is None:
+            # Own router => this app's routes (and its own request/response) are
+            # isolated from every other app in the process. ombott resolves the
+            # module-level request/response context-locally per request, so
+            # redirect()/ctx.response/Set-Cookie still land on THIS app's response
+            # -- even when several isolated apps serve concurrently behind one server.
             router = ombott_ng.Ombott()
+            router.setup()
         super().__init__(cfg, ctx, router=router)
 
     def use(self, *fixt):
