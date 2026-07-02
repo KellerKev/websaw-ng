@@ -38,15 +38,25 @@ class BaseForm:
     def get_options(self):
         # not implemented
         ...
-    
+
+    def _record_pk(self, record):
+        """Native primary key of ``record`` (scalar for a single key, dict for a
+        composite key, None for a no-PK table)."""
+        if record is None:
+            return None
+        table = getattr(self, "table", None)
+        if table is not None:
+            return table._pk_of(record)
+        return record.get("id")
+
     def process(self, ctx, db, table, rec):
         self.db = db
         self.table = table
         if ctx.request.method == 'POST':
-            if self.__call__(ctx.request.json or ctx.request.POST, record_id = rec and rec.id).accepted:   
+            if self.__call__(ctx.request.json or ctx.request.POST, record_id=self._record_pk(rec)).accepted:
                 if isinstance(self.fields, list):
                     return self
-                
+
                 if not rec:
                     ret = self.insert(self.table)
                     if ret:
@@ -55,23 +65,24 @@ class BaseForm:
                     if self.update(record = rec):
                         db.commit()
                         self.message = 'Successfully updated record in db'
-        
+
         if ctx.request.method == 'GET':
             if rec:
-                if self.__call__(rec.as_dict(), record_id = rec and rec.id).accepted:   
+                if self.__call__(rec.as_dict(), record_id=self._record_pk(rec)).accepted:
                     return self
                 else:
-                    print('We need to do something here')    
+                    print('We need to do something here')
             else:
-                if self.__call__(None, record_id = rec and rec.id).accepted:   
+                if self.__call__(None, record_id=self._record_pk(rec)).accepted:
                     return self
                 else:
-                    print('We need to do something here')    
+                    print('We need to do something here')
         return self
     
     def __call__(self, payload, record = None, record_id = None):
         self.record = record
-        record_id = self.record_id = record_id or record and record.get("id")
+        record_id = self.record_id = (record_id if record_id is not None
+                                      else self._record_pk(record))
         validated_vars = {}
         self.files = []
         for field in self.fields:
@@ -144,8 +155,8 @@ class BaseForm:
         if not vars:
             return
         db = table._db
-        if record_id:
-            q = table._id == record_id
+        if record_id is not None:
+            q = table._pk_query(record_id)
         elif query:
             q = query
 
@@ -173,7 +184,7 @@ class BaseForm:
         db(q).update(**vars)
         if record:
             record.update(**vars)
-            return record.id
+            return table._pk_of(record)
 
     def insert(self, table):
         if not self.accepted:
