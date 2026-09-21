@@ -1,9 +1,9 @@
 
 import urllib
-import threading
 from types import SimpleNamespace
 
 from ..core import Fixture, BaseContext
+from ..core.ctxlocal import ContextLocal
 
 url_quote = urllib.parse.quote
 
@@ -55,7 +55,11 @@ class URL(Fixture):
         )
 
 
-class URLBuilderLocal(threading.local):
+class URLBuilderLocal(ContextLocal):
+    """The URL context of the request being served. Context-local, not thread-local:
+    under ASGI every request runs on the same thread, so a ``threading.local`` would
+    hand one request the scheme and domain of another served concurrently."""
+    __slots__ = ()
     url_ctx: URLContext
 
 

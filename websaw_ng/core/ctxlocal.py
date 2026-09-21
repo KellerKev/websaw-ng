@@ -13,17 +13,29 @@ import contextvars
 
 
 class ContextLocal:
+    """Attribute storage that is private to the current thread (WSGI) or task (ASGI).
+
+    Writes are copy-on-write: setting an attribute copies the current dict and stores
+    the copy in the ContextVar, so it lands in the writing task's own context only.
+    Mutating the stored dict in place would not be safe: a dict created before the
+    tasks exist (a module-level ``ctxd = Context()`` sets defaults at import time) is
+    inherited *by reference* by every task, and concurrent requests would then share,
+    and overwrite, each other's state. Reads see whatever the task inherited, so
+    import-time defaults stay visible.
+
+    Values stored here that are themselves mutable (a dict, a SimpleNamespace) are
+    only per-request if each request assigns a fresh one, as ``BaseContext.initialize``
+    does for ``state``, ``env`` and the fixtures' ``fixtures_data``.
+    """
+
     __slots__ = ("_cv",)
 
     def __init__(self):
         object.__setattr__(self, "_cv", contextvars.ContextVar("websaw.ctxlocal"))
 
     def _store(self):
-        d = self._cv.get(None)
-        if d is None:
-            d = {}
-            self._cv.set(d)
-        return d
+        """The current values, read-only: never mutate the returned dict."""
+        return self._cv.get(None) or {}
 
     def __getattr__(self, name):
         try:
@@ -32,10 +44,14 @@ class ContextLocal:
             raise AttributeError(name)
 
     def __setattr__(self, name, value):
-        self._store()[name] = value
+        d = dict(self._store())
+        d[name] = value
+        self._cv.set(d)
 
     def __delattr__(self, name):
+        d = dict(self._store())
         try:
-            del self._store()[name]
+            del d[name]
         except KeyError:
             raise AttributeError(name)
+        self._cv.set(d)
