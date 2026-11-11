@@ -127,8 +127,9 @@ tools it builds on). Their copyright notices are retained throughout. 🙏
 
 ## License
 
-**MIT** — see [LICENSE](LICENSE). Copyright © 2026 KellerKev; portions © 2022
-Valery Kucherov, and derived from py4web (© Massimo Di Pierro 2017–2022). The
+**MIT** — see [LICENSE](LICENSE). Copyright © 2026 Kevin Keller; portions © 2022
+Valery Kucherov, and parts derived from py4web (© Massimo Di Pierro 2017–2022,
+BSD license, see [NOTICE](NOTICE)). The
 sibling packages carry their own licenses — the `*saw` packages authored here are
 BSD-3-Clause; `upytl` / `pyjsaw` / `ombott-ng` are MIT.
 
